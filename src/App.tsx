@@ -1,24 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import {useEffect} from 'react';
+import Axios from 'axios';
+
+
 
 function App() {
+
+  useEffect(() => {
+      navigator.geolocation.getCurrentPosition((info: Position) => {
+          const latitude = info.coords.latitude.toString();
+          const longitude = info.coords.longitude.toString();          
+          Axios.get("https://geocode.xyz/"+latitude+","+longitude+"?json=1");
+      });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container text-center">
+      <div>
+        <h1 className="panel-title">Próximo feriado vai ser:</h1>
+      </div>
+      <div>
+        <h1 className="panel-title">~dia aqui~</h1>
+      </div>
+      <div>
+        <h1 className="panel-title">Faltam X semana(s)</h1>
+      </div>
+      <div>
+        <h1 className="panel-title"> X dias(s)</h1>
+      </div>
+      <div>
+        <h3 className="panel-title"> XX:XX:XX horas(s)</h3>
+      </div>
     </div>
   );
 }
