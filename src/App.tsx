@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState } from 'react';
 import {useEffect} from 'react';
-import Axios from 'axios';
+import axios from 'axios';
 const TOKEN = "cmFmYWVsLmFsdmVzLmRzQGdtYWlsLmNvbSZoYXNoPTUxODUxNDM0";
 
 interface Feriado{
@@ -29,12 +30,12 @@ function App() {
           let estado:string = '';  
           let feriados:Array<any> = [];         
 
-          Axios.get(`https://geocode.xyz/${latitude},${longitude}?json=1`).then( (response)=>{
+          axios.get(`https://geocode.xyz/${latitude},${longitude}?json=1`).then( (response)=>{
             cidade = response.data.city;
             estado = response.data.state;
             console.log(response.statusText);
             
-            Axios.get(`https://api.calendario.com.br/?json=true&ano=${hoje.getFullYear()}&estado=${estado}&cidade=${cidade}&token=${TOKEN}`).then((response)=>{
+            axios.get(`https://api.calendario.com.br/?json=true&ano=${hoje.getFullYear()}&estado=${estado}&cidade=${cidade}&token=${TOKEN}`).then((response)=>{
               feriados = response.data;
               const filtrado = feriados.filter(feriado=>{
                 return feriado.type_code !== '9' && new Date(feriado.date.split('/').reverse().join('/')) >= hoje;
@@ -45,17 +46,21 @@ function App() {
                 data: filtrado[0].date,
                 descricao: filtrado[0].description,
                 link: filtrado[0].link
-              });
+              });             
 
-              console.log(feriado);
-
+            }).catch(error=>{
+              console.log("Deu ruim.Feriado");
             });
             
           }).catch(error=>{
-            console.log(error);
+            console.log("Deu ruim.Cidade");
           });
           
 
+      }, (error)=>{
+        if (error.code === error.PERMISSION_DENIED){
+          console.log("ME LIBERA!!!!!!");
+        }
       });
   }, []);
 
