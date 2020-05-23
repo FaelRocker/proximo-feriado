@@ -1,26 +1,71 @@
 import React, { useState } from 'react';
 import {useEffect} from 'react';
 import Axios from 'axios';
+const TOKEN = "cmFmYWVsLmFsdmVzLmRzQGdtYWlsLmNvbSZoYXNoPTUxODUxNDM0";
 
-
+interface Feriado{
+  nome: string
+  data: string
+  descricao: string
+  link: string
+}
 
 function App() {
+  const [feriado, setFeriado] = useState<Feriado>({
+    nome: '',
+    data: '',
+    descricao: '',
+    link: ''
+  }); 
 
+  const hoje:Date = new Date();
+  
   useEffect(() => {
       navigator.geolocation.getCurrentPosition((info: Position) => {
           const latitude = info.coords.latitude.toString();
-          const longitude = info.coords.longitude.toString();          
-          Axios.get("https://geocode.xyz/"+latitude+","+longitude+"?json=1");
+          const longitude = info.coords.longitude.toString();
+          
+          let cidade:string = '';          
+          let estado:string = '';  
+          let feriados:Array<any> = [];         
+
+          Axios.get(`https://geocode.xyz/${latitude},${longitude}?json=1`).then( (response)=>{
+            cidade = response.data.city;
+            estado = response.data.state;
+            console.log(response.statusText);
+            
+            Axios.get(`https://api.calendario.com.br/?json=true&ano=${hoje.getFullYear()}&estado=${estado}&cidade=${cidade}&token=${TOKEN}`).then((response)=>{
+              feriados = response.data;
+              const filtrado = feriados.filter(feriado=>{
+                return feriado.type_code !== '9' && new Date(feriado.date.split('/').reverse().join('/')) >= hoje;
+              });
+              
+              setFeriado({
+                nome: filtrado[0].name,
+                data: filtrado[0].date,
+                descricao: filtrado[0].description,
+                link: filtrado[0].link
+              });
+
+              console.log(feriado);
+
+            });
+            
+          }).catch(error=>{
+            console.log(error);
+          });
+          
+
       });
   }, []);
 
   return (
     <div className="container text-center">
       <div>
-        <h1 className="panel-title">Próximo feriado vai ser:</h1>
+        <h1 className="panel-title">Próximo feriado vai ser: {`${feriado.nome}`}</h1>
       </div>
       <div>
-        <h1 className="panel-title">~dia aqui~</h1>
+        <h1 className="panel-title">{`${feriado.data}`}</h1>
       </div>
       <div>
         <h1 className="panel-title">Faltam X semana(s)</h1>
